@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    container_name: saas-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass123
+      POSTGRES_DB: appdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d
+
+  api:
+    image: saas-api
+    container_name: saas-api
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://postgres:pass123@db:5432/appdb
+    ports:
+      - "3000:3000"
+
+  worker:
+    image: saas-api
+    container_name: saas-worker
+    depends_on:
+      - db
+    environment:
+      MODE: worker
+      DATABASE_URL: postgres://postgres:pass123@db:5432/appdb

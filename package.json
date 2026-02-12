@@ -1,0 +1,18 @@
+{
+  "name": "saas-api-starter",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "api": "node dist/api/index.js",
+    "worker": "node dist/worker/worker.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "pg": "^8.11.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "@types/pg": "^8.10.0"
+  }
+}

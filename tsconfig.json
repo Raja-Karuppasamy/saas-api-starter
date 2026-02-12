@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": ".",
+    "target": "ES2020",
+    "module": "CommonJS",
+    "esModuleInterop": true,
+    "strict": false
+  },
+  "include": ["api", "worker"]
+}
