@@ -26,7 +26,17 @@ jobs:
           push: true
           tags: rajajeba/saas-api:latest
 
-     #      - name: Restart Kubernetes Deployment
-#        run: |
-#          kubectl rollout restart deployment api
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: v1.29.0
 
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl set image deployment/api api=rajajeba/saas-api:latest
+          kubectl rollout status deployment/api
