@@ -23,3 +23,16 @@ app.get("/users", async (_req, res) => {
 app.listen(PORT, () => {
   console.log(`API running on port ${PORT}`);
 });
+app.get("/burn", (req, res) => {
+  const end = Date.now() + 3000; // 3 seconds hard CPU
+
+  while (Date.now() < end) {
+    Math.sqrt(Math.random());
+  }
+
+  res.json({ ok: true });
+});
+
+
+
+

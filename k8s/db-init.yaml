@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-init
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: OnFailure
+
+      containers:
+        - name: db-init
+          image: postgres:15
+
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: DATABASE_URL
+
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Postgres..."
+              until pg_isready -d "$DATABASE_URL"; do sleep 2; done
+
+              echo "Running schema..."
+              psql "$DATABASE_URL" -f /schema/schema.sql
+
+              echo "DB initialized."
+
+          volumeMounts:
+            - name: schema
+              mountPath: /schema
+
+      volumes:
+        - name: schema
+          configMap:
+            name: db-schema
