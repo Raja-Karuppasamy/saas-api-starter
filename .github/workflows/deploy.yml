@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build:
+  build-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -34,7 +34,10 @@ jobs:
       - name: Configure kubeconfig
         run: |
           mkdir -p ~/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > ~/.kube/config
+
+      - name: Verify cluster access
+        run: kubectl get nodes
 
       - name: Deploy to Kubernetes
         run: |
