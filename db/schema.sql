@@ -3,3 +3,22 @@ CREATE TABLE IF NOT EXISTS users (
   email TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT NOW()
 );
+CREATE TABLE IF NOT EXISTS organizations (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS api_keys (
+  id SERIAL PRIMARY KEY,
+  org_id INTEGER REFERENCES organizations(id),
+  key TEXT UNIQUE NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS usage_logs (
+  id SERIAL PRIMARY KEY,
+  org_id INTEGER REFERENCES organizations(id),
+  endpoint TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
