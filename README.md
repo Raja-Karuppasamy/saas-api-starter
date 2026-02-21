@@ -1,31 +1,65 @@
-🚀 QuickAI
+# QuickAI
 
-Simple AI APIs for developers.
+Simple production-ready AI API for developers and startups.
 
-Rewrite, summarize, translate, and extract data using clean REST endpoints — with built-in usage tracking and Stripe billing.
+## Features
 
-✨ Features
+- Rewrite text  
+- Summarize content  
+- Translate languages  
+- Extract structured data  
+- API key authentication  
+- Usage limits per organization  
+- Stripe subscriptions  
 
-API key authentication
+---
 
-Usage limits
+## Base URL
 
-Stripe subscriptions
+https://saas-api-starter-production-bb44.up.railway.app
 
-Rewrite / Summarize / Translate / Extract
+---
 
-PostgreSQL backend
+## Authentication
 
-Simple REST API
+All endpoints require:
 
-📦 Tech Stack
+x-api-key: YOUR_API_KEY
 
-Node.js + Express
+---
 
-PostgreSQL
+## Endpoints
 
-OpenAI
+POST /ai/summarize  
+POST /ai/rewrite  
+POST /ai/translate  
+POST /ai/extract  
 
-Stripe
+### Example Payload
 
-Railway
+```json
+{
+  "input": "your text"
+}
+Example Response
+{
+  "output": "...",
+  "remaining": 998
+}
+
+Create Organization
+
+POST /orgs
+
+Returns:
+
+{
+  "org_id": "...",
+  "api_key": "sk_..."
+}
+
+Pricing
+
+$19/month — 100k requests.
+
+Built by Raja.
