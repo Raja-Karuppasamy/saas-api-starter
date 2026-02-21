@@ -603,6 +603,19 @@ app.get("/cancel", (_req, res) =>
 
 const PORT = Number(process.env.PORT) || 3000;
 
-app.listen(PORT, "0.0.0.0", () =>
-  console.log("API running on port", PORT)
-);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log("API running on port", PORT);
+});
+app.get("/", (_req, res) => {
+  res.send(`
+    <h1>QuickAI</h1>
+    <p>Simple AI API for developers.</p>
+    <ul>
+      <li>/ai/summarize</li>
+      <li>/ai/rewrite</li>
+      <li>/ai/translate</li>
+      <li>/ai/extract</li>
+    </ul>
+    <p>POST /orgs to get API key</p>
+  `);
+});
