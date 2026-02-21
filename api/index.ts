@@ -22,7 +22,6 @@ const pool = new Pool({
 });
 
 const app = express();
-const PORT = Number(process.env.PORT) || 3000;
 
 /* ---------------- WEBHOOK (MUST BE FIRST) ---------------- */
 
@@ -182,6 +181,9 @@ app.get("/me", authMiddleware, async (req: any, res) => {
 
 
 /* ---------------- ROUTES ---------------- */
+app.get("/", (_req, res) => {
+  res.send("OK");
+});
 
 app.get("/health", async (_req, res) => {
   const r = await pool.query("SELECT NOW()");
@@ -598,6 +600,8 @@ app.get("/cancel", (_req, res) =>
 );
 
 /* START */
+
+const PORT = Number(process.env.PORT) || 3000;
 
 app.listen(PORT, "0.0.0.0", () =>
   console.log("API running on port", PORT)
