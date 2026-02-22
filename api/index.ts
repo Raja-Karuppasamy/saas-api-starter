@@ -781,14 +781,75 @@ app.listen(PORT, "0.0.0.0", () => {
 });
 app.get("/", (_req, res) => {
   res.send(`
+<!DOCTYPE html>
+<html>
+<head>
+  <title>QuickAI</title>
+  <meta charset="utf-8" />
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: #0b0b0b;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .box {
+      max-width: 600px;
+      padding: 40px;
+    }
+    h1 {
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
+    p {
+      opacity: 0.8;
+      line-height: 1.5;
+    }
+    pre {
+      background: #111;
+      padding: 12px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 13px;
+    }
+    .price {
+      margin-top: 20px;
+      font-size: 20px;
+      color: #00ffb3;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
     <h1>QuickAI</h1>
-    <p>Simple AI API for developers.</p>
+    <p>Simple production-ready AI API.</p>
+
+    <p>Endpoints:</p>
     <ul>
       <li>/ai/summarize</li>
       <li>/ai/rewrite</li>
       <li>/ai/translate</li>
       <li>/ai/extract</li>
+      <li>/ai/classify</li>
+      <li>/ai/keywords</li>
+      <li>/ai/grammar</li>
     </ul>
-    <p>POST /orgs to get API key</p>
-  `);
+
+    <p>Example:</p>
+
+<pre>
+curl -X POST /ai/summarize \\
+-H "x-api-key: YOUR_KEY" \\
+-d '{"input":"Hello world"}'
+</pre>
+
+    <div class="price">$19/month • 100k requests</div>
+  </div>
+</body>
+</html>
+`);
 });
