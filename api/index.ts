@@ -453,6 +453,80 @@ app.post("/ai/classify", authMiddleware, async (req: any, res) => {
   }
 });
 
+app.post("/ai/keywords", authMiddleware, async (req: any, res) => {
+  const { input } = req.body;
+  if (!input) return res.status(400).json({ error: "Missing input" });
+
+  const { rows } = await pool.query(
+    `
+    SELECT o.monthly_limit, COUNT(u.id) AS used
+    FROM orgs o
+    LEFT JOIN usage_logs u
+      ON o.id = u.org_id
+      AND u.created_at > date_trunc('month', now())
+    WHERE o.id = $1
+    GROUP BY o.id
+    `,
+    [req.orgId]
+  );
+
+  const used = Number(rows[0].used);
+  const limit = rows[0].monthly_limit;
+
+  if (used >= limit) return res.status(402).json({ error: "Monthly limit reached" });
+
+  const response = await openai.responses.create({
+    model: "gpt-4.1-mini",
+    input: `Extract 5 important keywords from this:\n\n${input}`,
+  });
+
+  const output = response.output_text || "";
+
+  await pool.query(
+    `INSERT INTO usage_logs(org_id, endpoint) VALUES ($1,$2)`,
+    [req.orgId, "/ai/keywords"]
+  );
+
+  res.json({ output, remaining: limit - used - 1 });
+});
+
+app.post("/ai/grammar", authMiddleware, async (req: any, res) => {
+  const { input } = req.body;
+  if (!input) return res.status(400).json({ error: "Missing input" });
+
+  const { rows } = await pool.query(
+    `
+    SELECT o.monthly_limit, COUNT(u.id) AS used
+    FROM orgs o
+    LEFT JOIN usage_logs u
+      ON o.id = u.org_id
+      AND u.created_at > date_trunc('month', now())
+    WHERE o.id = $1
+    GROUP BY o.id
+    `,
+    [req.orgId]
+  );
+
+  const used = Number(rows[0].used);
+  const limit = rows[0].monthly_limit;
+
+  if (used >= limit) return res.status(402).json({ error: "Monthly limit reached" });
+
+  const response = await openai.responses.create({
+    model: "gpt-4.1-mini",
+    input: `Fix grammar and improve clarity:\n\n${input}`,
+  });
+
+  const output = response.output_text || "";
+
+  await pool.query(
+    `INSERT INTO usage_logs(org_id, endpoint) VALUES ($1,$2)`,
+    [req.orgId, "/ai/grammar"]
+  );
+
+  res.json({ output, remaining: limit - used - 1 });
+});
+
 app.post("/ai/extract", authMiddleware, async (req: any, res) => {
   const { input } = req.body;
 
