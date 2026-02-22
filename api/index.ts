@@ -181,9 +181,6 @@ app.get("/me", authMiddleware, async (req: any, res) => {
 
 
 /* ---------------- ROUTES ---------------- */
-app.get("/", (_req, res) => {
-  res.send("OK");
-});
 
 app.get("/health", async (_req, res) => {
   const r = await pool.query("SELECT NOW()");
@@ -723,62 +720,8 @@ app.get("/cancel", (_req, res) =>
 
 const PORT = Number(process.env.PORT) || 3000;
 
-app.get("/", (_req, res) => {
-  res.send(`
-    <html>
-      <head>
-        <title>QuickAI</title>
-        <style>
-          body {
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #0f172a;
-            color: white;
-            text-align: center;
-            padding: 80px;
-          }
-          h1 { font-size: 48px; margin-bottom: 10px; }
-          p { font-size: 20px; color: #94a3b8; }
-          .price {
-            margin-top: 30px;
-            font-size: 24px;
-            font-weight: bold;
-          }
-          code {
-            background: #1e293b;
-            padding: 10px;
-            display: block;
-            margin: 30px auto;
-            max-width: 600px;
-            border-radius: 8px;
-          }
-        </style>
-      </head>
-      <body>
-        <h1>QuickAI</h1>
-        <p>Simple AI APIs for developers.</p>
-        <p>Summarize • Rewrite • Translate • Extract • Classify • Keywords • Grammar</p>
 
-        <div class="price">
-          $19/month — 100k requests
-        </div>
 
-        <code>
-curl -X POST /ai/summarize<br/>
--H "x-api-key: YOUR_KEY"<br/>
--d '{"input":"Your text here"}'
-        </code>
-
-        <p style="margin-top:50px;color:#64748b;">
-          Production-ready. Stripe-powered. Usage-based.
-        </p>
-      </body>
-    </html>
-  `);
-});
-
-app.listen(PORT, "0.0.0.0", () => {
-  console.log("API running on port", PORT);
-});
 app.get("/", (_req, res) => {
   res.send(`
 <!DOCTYPE html>
@@ -852,4 +795,7 @@ curl -X POST /ai/summarize \\
 </body>
 </html>
 `);
+});
+app.listen(PORT, "0.0.0.0", () => {
+  console.log("API running on port", PORT);
 });
