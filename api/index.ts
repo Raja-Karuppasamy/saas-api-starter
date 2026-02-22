@@ -720,82 +720,110 @@ app.get("/cancel", (_req, res) =>
 
 const PORT = Number(process.env.PORT) || 3000;
 
-
-
 app.get("/", (_req, res) => {
   res.send(`
 <!DOCTYPE html>
 <html>
 <head>
-  <title>QuickAI</title>
-  <meta charset="utf-8" />
-  <style>
-    body {
-      margin: 0;
-      font-family: system-ui, sans-serif;
-      background: #0b0b0b;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .box {
-      max-width: 600px;
-      padding: 40px;
-    }
-    h1 {
-      font-size: 40px;
-      margin-bottom: 10px;
-    }
-    p {
-      opacity: 0.8;
-      line-height: 1.5;
-    }
-    pre {
-      background: #111;
-      padding: 12px;
-      border-radius: 6px;
-      overflow-x: auto;
-      font-size: 13px;
-    }
-    .price {
-      margin-top: 20px;
-      font-size: 20px;
-      color: #00ffb3;
-    }
-  </style>
+<meta charset="utf-8"/>
+<title>QuickAI</title>
+<style>
+body {
+  margin:0;
+  font-family: system-ui, sans-serif;
+  background:#050505;
+  color:white;
+}
+.container {
+  max-width:900px;
+  margin:0 auto;
+  padding:80px 20px;
+}
+h1 {
+  font-size:48px;
+  margin-bottom:10px;
+}
+.subtitle {
+  color:#aaa;
+  margin-bottom:40px;
+}
+.grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:40px;
+}
+.card {
+  background:#0e0e0e;
+  padding:20px;
+  border-radius:10px;
+}
+pre {
+  background:#111;
+  padding:12px;
+  border-radius:6px;
+  overflow-x:auto;
+  font-size:13px;
+}
+.price {
+  margin-top:40px;
+  font-size:24px;
+  color:#00ffb3;
+}
+footer {
+  margin-top:60px;
+  color:#555;
+}
+</style>
 </head>
+
 <body>
-  <div class="box">
-    <h1>QuickAI</h1>
-    <p>Simple production-ready AI API.</p>
+<div class="container">
 
-    <p>Endpoints:</p>
-    <ul>
-      <li>/ai/summarize</li>
-      <li>/ai/rewrite</li>
-      <li>/ai/translate</li>
-      <li>/ai/extract</li>
-      <li>/ai/classify</li>
-      <li>/ai/keywords</li>
-      <li>/ai/grammar</li>
-    </ul>
+<h1>QuickAI</h1>
+<div class="subtitle">Production-ready AI APIs for developers.</div>
 
-    <p>Example:</p>
+<div class="grid">
+
+<div class="card">
+<b>Endpoints</b>
+<ul>
+<li>/ai/summarize</li>
+<li>/ai/rewrite</li>
+<li>/ai/translate</li>
+<li>/ai/extract</li>
+<li>/ai/classify</li>
+<li>/ai/keywords</li>
+<li>/ai/grammar</li>
+</ul>
+</div>
+
+<div class="card">
+<b>Quick Start</b>
+<pre>
+curl -X POST /orgs
+</pre>
 
 <pre>
 curl -X POST /ai/summarize \\
 -H "x-api-key: YOUR_KEY" \\
 -d '{"input":"Hello world"}'
 </pre>
+</div>
 
-    <div class="price">$19/month • 100k requests</div>
-  </div>
+</div>
+
+<div class="price">$19/month • 100k requests</div>
+
+<footer>
+Built for builders. Stripe powered. Usage metered.
+</footer>
+
+</div>
 </body>
 </html>
 `);
 });
+
 app.listen(PORT, "0.0.0.0", () => {
   console.log("API running on port", PORT);
 });
