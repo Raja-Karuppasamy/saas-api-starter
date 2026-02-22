@@ -407,6 +407,52 @@ app.post("/ai/summarize", authMiddleware, async (req: any, res) => {
   }
 });
 
+app.post("/ai/classify", authMiddleware, async (req: any, res) => {
+  const { input } = req.body;
+  if (!input) return res.status(400).json({ error: "Missing input" });
+
+  const { rows } = await pool.query(
+    `
+    SELECT o.id, o.monthly_limit, COUNT(u.id) AS used
+    FROM orgs o
+    LEFT JOIN usage_logs u
+      ON o.id = u.org_id
+      AND u.created_at > date_trunc('month', now())
+    WHERE o.id = $1
+    GROUP BY o.id
+    `,
+    [req.orgId]
+  );
+
+  const org = rows[0];
+  const used = Number(org.used);
+
+  if (used >= org.monthly_limit)
+    return res.status(402).json({ error: "Monthly limit reached" });
+
+  try {
+    const response = await openai.responses.create({
+      model: "gpt-4.1-mini",
+      input: `Classify this text into one clear category:\n\n${input}`,
+    });
+
+    const output = response.output_text || "";
+
+    await pool.query(
+      `INSERT INTO usage_logs(org_id, endpoint) VALUES ($1,$2)`,
+      [req.orgId, "/ai/classify"]
+    );
+
+    res.json({
+      output,
+      remaining: org.monthly_limit - used - 1,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "AI failed" });
+  }
+});
+
 app.post("/ai/extract", authMiddleware, async (req: any, res) => {
   const { input } = req.body;
 
