@@ -745,7 +745,7 @@ app.get("/", (_req, res) => {
   <style>
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: system-ui, sans-serif;
       background: #0b0b0b;
       color: white;
       display: flex;
@@ -753,98 +753,78 @@ app.get("/", (_req, res) => {
       align-items: center;
       height: 100vh;
     }
-    .container {
-      max-width: 900px;
+    .box {
+      max-width: 680px;
       padding: 40px;
     }
     h1 {
-      font-size: 48px;
-      margin-bottom: 12px;
+      font-size: 44px;
+      margin-bottom: 10px;
     }
     p {
-      opacity: 0.8;
+      opacity: 0.85;
       line-height: 1.6;
     }
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      margin-top: 30px;
-    }
-    .card {
-      background: #111;
-      padding: 20px;
-      border-radius: 10px;
-    }
-    ul {
-      padding-left: 18px;
-    }
     pre {
-      background: #050505;
-      padding: 12px;
+      background: #111;
+      padding: 14px;
       border-radius: 6px;
       overflow-x: auto;
       font-size: 13px;
     }
     .price {
-      margin-top: 30px;
-      font-size: 22px;
+      margin-top: 24px;
+      font-size: 20px;
       color: #00ffb3;
-      font-weight: 600;
     }
-    .footer {
-      margin-top: 40px;
-      opacity: 0.5;
+    .cta {
+      margin-top: 20px;
+      display: inline-block;
+      color: black;
+      background: #00ffb3;
+      padding: 10px 16px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
     }
   </style>
 </head>
-
 <body>
-  <div class="container">
-
+  <div class="box">
     <h1>QuickAI</h1>
 
     <p>
-      Ship AI features in minutes — not days.<br/>
-      Production-ready AI endpoints for indie SaaS builders.
+      Simple AI APIs for indie builders and startups.
+      Add summarization, rewriting, translation, extraction, classification, keywords and grammar
+      to your app in minutes.
     </p>
 
-    <div class="grid">
+    <p>Endpoints:</p>
+    <ul>
+      <li>/ai/summarize</li>
+      <li>/ai/rewrite</li>
+      <li>/ai/translate</li>
+      <li>/ai/extract</li>
+      <li>/ai/classify</li>
+      <li>/ai/keywords</li>
+      <li>/ai/grammar</li>
+    </ul>
 
-      <div class="card">
-        <strong>Endpoints</strong>
-        <ul>
-          <li>/ai/summarize</li>
-          <li>/ai/rewrite</li>
-          <li>/ai/translate</li>
-          <li>/ai/extract</li>
-          <li>/ai/classify</li>
-          <li>/ai/keywords</li>
-          <li>/ai/grammar</li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <strong>Quick start</strong>
 <pre>
-curl -X POST /orgs
-
 curl -X POST /ai/summarize \\
 -H "x-api-key: YOUR_KEY" \\
 -d '{"input":"Hello world"}'
 </pre>
-      </div>
 
-    </div>
+    <div class="price">$19/month • 100k requests</div>
 
-    <div class="price">
-      $19/month • 100k requests
-    </div>
+    <a class="cta" href="https://github.com/Raja-Karuppasamy/saas-api-starter">
+      Get API Key →
+    </a>
 
-    <div class="footer">
-      Built for builders. Stripe powered. Usage metered.
-    </div>
-
+    <p style="margin-top:40px;opacity:.5">
+      Stripe billing • Usage tracking • Production ready
+    </p>
   </div>
 </body>
 </html>
