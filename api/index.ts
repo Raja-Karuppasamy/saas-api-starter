@@ -740,126 +740,82 @@ app.get("/", (_req, res) => {
 <!DOCTYPE html>
 <html>
 <head>
-  <title>QuickAI</title>
-  <meta charset="utf-8" />
-  <style>
-    body {
-      margin: 0;
-      font-family: system-ui, sans-serif;
-      background: #0b0b0b;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .box {
-      max-width: 680px;
-      padding: 40px;
-    }
-    h1 {
-      font-size: 44px;
-      margin-bottom: 10px;
-    }
-    p {
-      opacity: 0.85;
-      line-height: 1.6;
-    }
-    pre {
-      background: #111;
-      padding: 14px;
-      border-radius: 6px;
-      overflow-x: auto;
-      font-size: 13px;
-    }
-    .price {
-      margin-top: 24px;
-      font-size: 20px;
-      color: #00ffb3;
-    }
-    .cta {
-      margin-top: 20px;
-      display: inline-block;
-      color: black;
-      background: #00ffb3;
-      padding: 10px 16px;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: 600;
-    }
-  </style>
-</head>
-<body>
-  <div class="box">
-    <h1>QuickAI</h1>
-
-    <p>
-      Simple AI APIs for indie builders and startups.
-      Add summarization, rewriting, translation, extraction, classification, keywords and grammar
-      to your app in minutes.
-    </p>
-
-    <p>Endpoints:</p>
-    <ul>
-      <li>/ai/summarize</li>
-      <li>/ai/rewrite</li>
-      <li>/ai/translate</li>
-      <li>/ai/extract</li>
-      <li>/ai/classify</li>
-      <li>/ai/keywords</li>
-      <li>/ai/grammar</li>
-    </ul>
-
-<pre>
-curl -X POST /ai/summarize \\
--H "x-api-key: YOUR_KEY" \\
--d '{"input":"Hello world"}'
-</pre>
-
-    <div class="price">$19/month • 100k requests</div>
-
-    <button id="getKey">Get API Key →</button>
-    <pre id="apiKeyBox" style="display:none"></pre>
-    <p style="margin-top:12px;font-size:14px;color:#888">
-      Free tier included. No credit card required.
-      </p>
-<script>
-async function createKey() {
-  const res = await fetch("/orgs", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ name: "web-user" })
-  });
-
-  const data = await res.json();
-
-  alert(
-    "API Key:\\n" + data.api_key + "\\n\\nSave this now — it will not be shown again."
-  );
+<meta charset="utf-8"/>
+<title>QuickAI</title>
+<style>
+body {
+  margin:0;
+  font-family:system-ui,sans-serif;
+  background:#0b0b0b;
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
 }
-</script>
+.box {
+  max-width:700px;
+  padding:40px;
+}
+pre {
+  background:#111;
+  padding:12px;
+  border-radius:6px;
+}
+button {
+  background:#00ffb3;
+  border:none;
+  padding:10px 18px;
+  border-radius:6px;
+  cursor:pointer;
+  margin-top:10px;
+}
+.price { color:#00ffb3; margin-top:20px; }
+</style>
+</head>
 
-    <p style="margin-top:40px;opacity:.5">
-      Stripe billing • Usage tracking • Production ready
-    </p>
-  </div>
-  <script>
+<body>
+<div class="box">
+<h1>QuickAI</h1>
+
+<p>Simple AI APIs for indie builders.</p>
+
+<ul>
+<li>/ai/summarize</li>
+<li>/ai/rewrite</li>
+<li>/ai/translate</li>
+<li>/ai/extract</li>
+<li>/ai/classify</li>
+<li>/ai/keywords</li>
+<li>/ai/grammar</li>
+</ul>
+
+<pre>curl -X POST /ai/summarize
+-H "x-api-key: YOUR_KEY"
+-d '{"input":"Hello world"}'</pre>
+
+<div class="price">$19/month • 100k requests</div>
+
+<button id="getKey">Get API Key</button>
+
+<pre id="apiKeyBox" style="display:none"></pre>
+
+<p style="opacity:.6;margin-top:30px">
+Stripe billing • Usage tracking • Production ready
+</p>
+
+</div>
+
+<script>
 document.getElementById("getKey").onclick = async () => {
-  const res = await fetch("/orgs", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: "{}"
-  });
-
-  const data = await res.json();
-
+  const r = await fetch("/orgs",{method:"POST"});
+  const d = await r.json();
   const box = document.getElementById("apiKeyBox");
-  box.style.display = "block";
-  box.textContent = "Your API Key:\n\n" + data.api_key;
+  box.style.display="block";
+  box.textContent="Your API Key:\\n\\n"+d.api_key;
 };
 </script>
+
 </body>
 </html>
 `);
