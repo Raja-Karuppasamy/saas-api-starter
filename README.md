@@ -35,6 +35,12 @@ curl -X POST https://saas-api-starter-production-bb44.up.railway.app/ai/rewrite 
 -H "Content-Type: application/json" \
 -H "x-api-key: YOUR_KEY" \
 -d '{"input":"we will get back to you"}'
+
+## Check Usage
+
+```bash
+curl -H "x-api-key: YOUR_KEY" \
+https://saas-api-starter-production-bb44.up.railway.app/usage
 Pricing
 
 $19/month — 100k requests.
