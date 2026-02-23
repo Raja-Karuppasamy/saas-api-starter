@@ -819,7 +819,9 @@ curl -X POST /ai/summarize \\
     <div class="price">$19/month • 100k requests</div>
 
     <button class="cta" onclick="createKey()">Get API Key →</button>
-
+    <p style="margin-top:12px;font-size:14px;color:#888">
+      Free tier included. No credit card required.
+      </p>
 <script>
 async function createKey() {
   const res = await fetch("/orgs", {
