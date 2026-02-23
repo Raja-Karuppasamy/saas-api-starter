@@ -179,7 +179,21 @@ app.get("/me", authMiddleware, async (req: any, res) => {
   });
 });
 
+app.get("/usage", authMiddleware, async (req: any, res) => {
+  const { rows } = await pool.query(
+    `
+    SELECT COUNT(*) AS used
+    FROM usage_logs
+    WHERE org_id = $1
+      AND created_at > date_trunc('month', now())
+    `,
+    [req.orgId]
+  );
 
+  res.json({
+    used: Number(rows[0].used),
+  });
+});
 /* ---------------- ROUTES ---------------- */
 
 app.get("/health", async (_req, res) => {
