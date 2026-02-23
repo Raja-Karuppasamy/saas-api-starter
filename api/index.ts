@@ -778,7 +778,7 @@ button {
 <div class="box">
 <h1>QuickAI</h1>
 
-<p>Simple AI APIs for indie builders.</p>
+<p>Drop-in AI APIs for indie builders. Ship features in minutes.</p>
 
 <ul>
 <li>/ai/summarize</li>
