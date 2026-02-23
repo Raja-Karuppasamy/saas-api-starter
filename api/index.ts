@@ -818,9 +818,25 @@ curl -X POST /ai/summarize \\
 
     <div class="price">$19/month • 100k requests</div>
 
-    <a class="cta" href="https://github.com/Raja-Karuppasamy/saas-api-starter">
-      Get API Key →
-    </a>
+    <button class="cta" onclick="createKey()">Get API Key →</button>
+
+<script>
+async function createKey() {
+  const res = await fetch("/orgs", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ name: "web-user" })
+  });
+
+  const data = await res.json();
+
+  alert(
+    "API Key:\\n" + data.api_key + "\\n\\nSave this now — it will not be shown again."
+  );
+}
+</script>
 
     <p style="margin-top:40px;opacity:.5">
       Stripe billing • Usage tracking • Production ready
