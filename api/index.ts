@@ -818,7 +818,8 @@ curl -X POST /ai/summarize \\
 
     <div class="price">$19/month • 100k requests</div>
 
-    <button class="cta" onclick="createKey()">Get API Key →</button>
+    <button id="getKey">Get API Key →</button>
+    <pre id="apiKeyBox" style="display:none"></pre>
     <p style="margin-top:12px;font-size:14px;color:#888">
       Free tier included. No credit card required.
       </p>
@@ -844,6 +845,21 @@ async function createKey() {
       Stripe billing • Usage tracking • Production ready
     </p>
   </div>
+  <script>
+document.getElementById("getKey").onclick = async () => {
+  const res = await fetch("/orgs", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: "{}"
+  });
+
+  const data = await res.json();
+
+  const box = document.getElementById("apiKeyBox");
+  box.style.display = "block";
+  box.textContent = "Your API Key:\n\n" + data.api_key;
+};
+</script>
 </body>
 </html>
 `);
