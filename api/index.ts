@@ -180,8 +180,8 @@ app.get("/me", authMiddleware, async (req: any, res) => {
 });
 
 app.get("/usage", authMiddleware, async (req: any, res) => {
-  // Total usage + plan
-  const { rows } = await pool.query(
+  // Monthly totals
+  const total = await pool.query(
     `
     SELECT
       o.plan,
@@ -197,13 +197,13 @@ app.get("/usage", authMiddleware, async (req: any, res) => {
     [req.orgId]
   );
 
-  const org = rows[0];
+  const org = total.rows[0];
 
   const used = Number(org.used);
   const limit = org.monthly_limit;
   const remaining = limit - used;
 
-  // Per-endpoint breakdown
+  // Per endpoint breakdown
   const breakdown = await pool.query(
     `
     SELECT endpoint, COUNT(*) AS count
@@ -216,12 +216,32 @@ app.get("/usage", authMiddleware, async (req: any, res) => {
   );
 
   const byEndpoint: Record<string, number> = {};
-
   breakdown.rows.forEach((r) => {
     byEndpoint[r.endpoint] = Number(r.count);
   });
 
-  // 🔔 80% warning moat
+  // Daily usage
+  const daily = await pool.query(
+    `
+    SELECT DATE(created_at) as day, COUNT(*) as count
+    FROM usage_logs
+    WHERE org_id = $1
+      AND created_at > date_trunc('month', now())
+    GROUP BY day
+    `,
+    [req.orgId]
+  );
+
+  const daysActive = daily.rows.length || 1;
+  const avgPerDay = used / daysActive;
+
+  let estimatedDaysRemaining = null;
+
+  if (avgPerDay > 0) {
+    estimatedDaysRemaining = Math.floor(remaining / avgPerDay);
+  }
+
+  // Warning
   let warning = null;
   if (used >= limit * 0.8) {
     warning = "Approaching monthly limit";
@@ -232,6 +252,8 @@ app.get("/usage", authMiddleware, async (req: any, res) => {
     limit,
     used,
     remaining,
+    average_per_day: Number(avgPerDay.toFixed(2)),
+    estimated_days_until_limit: estimatedDaysRemaining,
     by_endpoint: byEndpoint,
     warning,
   });
