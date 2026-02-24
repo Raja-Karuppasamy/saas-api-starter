@@ -180,18 +180,8 @@ app.get("/me", authMiddleware, async (req: any, res) => {
 });
 
 app.get("/usage", authMiddleware, async (req: any, res) => {
-  const summary = await pool.query(
-    `
-    SELECT endpoint, COUNT(*) as count
-    FROM usage_logs
-    WHERE org_id = $1
-      AND created_at > date_trunc('month', now())
-    GROUP BY endpoint
-    `,
-    [req.orgId]
-  );
-
-  const total = await pool.query(
+  // Total usage + plan
+  const { rows } = await pool.query(
     `
     SELECT
       o.plan,
@@ -207,19 +197,43 @@ app.get("/usage", authMiddleware, async (req: any, res) => {
     [req.orgId]
   );
 
-  const org = total.rows[0];
+  const org = rows[0];
 
-  const byEndpoint: any = {};
-  summary.rows.forEach((r) => {
+  const used = Number(org.used);
+  const limit = org.monthly_limit;
+  const remaining = limit - used;
+
+  // Per-endpoint breakdown
+  const breakdown = await pool.query(
+    `
+    SELECT endpoint, COUNT(*) AS count
+    FROM usage_logs
+    WHERE org_id = $1
+      AND created_at > date_trunc('month', now())
+    GROUP BY endpoint
+    `,
+    [req.orgId]
+  );
+
+  const byEndpoint: Record<string, number> = {};
+
+  breakdown.rows.forEach((r) => {
     byEndpoint[r.endpoint] = Number(r.count);
   });
 
+  // 🔔 80% warning moat
+  let warning = null;
+  if (used >= limit * 0.8) {
+    warning = "Approaching monthly limit";
+  }
+
   res.json({
     plan: org.plan,
-    limit: org.monthly_limit,
-    used: Number(org.used),
-    remaining: org.monthly_limit - Number(org.used),
+    limit,
+    used,
+    remaining,
     by_endpoint: byEndpoint,
+    warning,
   });
 });
 /* ---------------- ROUTES ---------------- */
