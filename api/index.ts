@@ -180,13 +180,13 @@ app.get("/me", authMiddleware, async (req: any, res) => {
 });
 
 app.get("/usage", authMiddleware, async (req: any, res) => {
-  // Monthly totals
-  const total = await pool.query(
+  const { rows } = await pool.query(
     `
     SELECT
       o.plan,
       o.monthly_limit,
-      COUNT(u.id) AS used
+      COUNT(u.id) AS used,
+      COUNT(u.id) FILTER (WHERE u.endpoint IS NOT NULL) AS total
     FROM orgs o
     LEFT JOIN usage_logs u
       ON o.id = u.org_id
@@ -197,90 +197,68 @@ app.get("/usage", authMiddleware, async (req: any, res) => {
     [req.orgId]
   );
 
-  const org = total.rows[0];
+  const org = rows[0];
 
   const used = Number(org.used);
-  const limit = org.monthly_limit;
+  const limit = Number(org.monthly_limit);
   const remaining = limit - used;
 
-  // Per endpoint breakdown
-  const breakdown = await pool.query(
+  // Days elapsed this month
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const daysElapsed =
+    Math.max(
+      1,
+      Math.ceil((now.getTime() - startOfMonth.getTime()) / 86400000)
+    );
+
+  const averagePerDay = used / daysElapsed;
+
+  // Days left in month
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  const daysLeftInMonth = Math.ceil(
+    (endOfMonth.getTime() - now.getTime()) / 86400000
+  );
+
+  let estimatedDaysUntilLimit: any = null;
+
+  if (averagePerDay > 0) {
+    estimatedDaysUntilLimit = Math.floor(remaining / averagePerDay);
+  }
+
+  // IMPORTANT: cap to billing cycle
+  if (
+    estimatedDaysUntilLimit &&
+    estimatedDaysUntilLimit > daysLeftInMonth
+  ) {
+    estimatedDaysUntilLimit = "Safe for this billing cycle";
+  }
+
+  // Per-endpoint breakdown
+  const endpointRows = await pool.query(
     `
-    SELECT endpoint, COUNT(*) AS count
+    SELECT endpoint, COUNT(*)::int AS count
     FROM usage_logs
-    WHERE org_id = $1
+    WHERE org_id=$1
       AND created_at > date_trunc('month', now())
     GROUP BY endpoint
     `,
     [req.orgId]
   );
 
-  const byEndpoint: Record<string, number> = {};
-  breakdown.rows.forEach((r) => {
-    byEndpoint[r.endpoint] = Number(r.count);
-  });
+  const byEndpoint: any = {};
+  endpointRows.rows.forEach((r) => (byEndpoint[r.endpoint] = r.count));
 
-  // Daily usage
-  const daily = await pool.query(
-    `
-    SELECT DATE(created_at) as day, COUNT(*) as count
-    FROM usage_logs
-    WHERE org_id = $1
-      AND created_at > date_trunc('month', now())
-    GROUP BY day
-    `,
-    [req.orgId]
-  );
-
-  const daysActive = daily.rows.length || 1;
-  const avgPerDay = used / daysActive;
-
-  let estimatedDaysRemaining = null;
-
-  if (avgPerDay > 0) {
-    estimatedDaysRemaining = Math.floor(remaining / avgPerDay);
-  }
-
-  // Warning
-  let warning = null;
-  if (used >= limit * 0.8) {
-    warning = "Approaching monthly limit";
-  }
-  // Days left in current month
-const now = new Date();
-const endOfMonth = new Date(
-  now.getFullYear(),
-  now.getMonth() + 1,
-  0
-);
-
-const msPerDay = 1000 * 60 * 60 * 24;
-const daysLeftInMonth = Math.ceil(
-  (endOfMonth.getTime() - now.getTime()) / msPerDay
-);
-
-let estimatedDaysUntilLimit = null;
-
-if (avgPerDay > 0) {
-  estimatedDaysUntilLimit = Math.floor(remaining / avgPerDay);
-}
-
-// Cap to remaining days in billing cycle
-if (
-  estimatedDaysUntilLimit &&
-  estimatedDaysUntilLimit > daysLeftInMonth
-) {
-  estimatedDaysUntilLimit = "Safe for this billing cycle";
-}
   res.json({
     plan: org.plan,
     limit,
     used,
     remaining,
-    average_per_day: Number(avgPerDay.toFixed(2)),
-    estimated_days_until_limit: estimatedDaysRemaining,
+    average_per_day: Number(averagePerDay.toFixed(2)),
+    estimated_days_until_limit: estimatedDaysUntilLimit,
     by_endpoint: byEndpoint,
-    warning,
+    warning:
+      remaining < limit * 0.2 ? "Approaching monthly limit" : null,
   });
 });
 /* ---------------- ROUTES ---------------- */
