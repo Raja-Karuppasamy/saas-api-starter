@@ -762,6 +762,13 @@ app.get("/cancel", (_req, res) =>
 
 const PORT = Number(process.env.PORT) || 3000;
 
+app.get("/status", (_req, res) => {
+  res.json({
+    name: "QuickAI",
+    version: "1.0.0",
+    status: "operational",
+  });
+});
 
 app.get("/", (_req, res) => {
   res.send(`
@@ -823,7 +830,10 @@ button {
 -d '{"input":"Hello world"}'</pre>
 
 <div class="price">$19/month • 100k requests</div>
-
+<p>
+  Production-ready analytics included.
+  Track usage per endpoint directly via API.
+</p>
 <button id="getKey">Get API Key</button>
 
 <pre id="apiKeyBox" style="display:none"></pre>
