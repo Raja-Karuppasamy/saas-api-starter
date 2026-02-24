@@ -180,18 +180,46 @@ app.get("/me", authMiddleware, async (req: any, res) => {
 });
 
 app.get("/usage", authMiddleware, async (req: any, res) => {
-  const { rows } = await pool.query(
+  const summary = await pool.query(
     `
-    SELECT COUNT(*) AS used
+    SELECT endpoint, COUNT(*) as count
     FROM usage_logs
     WHERE org_id = $1
       AND created_at > date_trunc('month', now())
+    GROUP BY endpoint
     `,
     [req.orgId]
   );
 
+  const total = await pool.query(
+    `
+    SELECT
+      o.plan,
+      o.monthly_limit,
+      COUNT(u.id) AS used
+    FROM orgs o
+    LEFT JOIN usage_logs u
+      ON o.id = u.org_id
+      AND u.created_at > date_trunc('month', now())
+    WHERE o.id = $1
+    GROUP BY o.id
+    `,
+    [req.orgId]
+  );
+
+  const org = total.rows[0];
+
+  const byEndpoint: any = {};
+  summary.rows.forEach((r) => {
+    byEndpoint[r.endpoint] = Number(r.count);
+  });
+
   res.json({
-    used: Number(rows[0].used),
+    plan: org.plan,
+    limit: org.monthly_limit,
+    used: Number(org.used),
+    remaining: org.monthly_limit - Number(org.used),
+    by_endpoint: byEndpoint,
   });
 });
 /* ---------------- ROUTES ---------------- */
