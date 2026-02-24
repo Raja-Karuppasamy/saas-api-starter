@@ -246,7 +246,32 @@ app.get("/usage", authMiddleware, async (req: any, res) => {
   if (used >= limit * 0.8) {
     warning = "Approaching monthly limit";
   }
+  // Days left in current month
+const now = new Date();
+const endOfMonth = new Date(
+  now.getFullYear(),
+  now.getMonth() + 1,
+  0
+);
 
+const msPerDay = 1000 * 60 * 60 * 24;
+const daysLeftInMonth = Math.ceil(
+  (endOfMonth.getTime() - now.getTime()) / msPerDay
+);
+
+let estimatedDaysUntilLimit = null;
+
+if (avgPerDay > 0) {
+  estimatedDaysUntilLimit = Math.floor(remaining / avgPerDay);
+}
+
+// Cap to remaining days in billing cycle
+if (
+  estimatedDaysUntilLimit &&
+  estimatedDaysUntilLimit > daysLeftInMonth
+) {
+  estimatedDaysUntilLimit = "Safe for this billing cycle";
+}
   res.json({
     plan: org.plan,
     limit,
