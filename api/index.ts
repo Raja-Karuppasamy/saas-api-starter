@@ -46,26 +46,34 @@ app.post(
 
     console.log("Webhook:", event.type);
 
-    /* UPGRADE */
-   if (event.type === "checkout.session.completed") {
+  if (event.type === "checkout.session.completed") {
   const session = event.data.object as any;
-
   const orgId = session.metadata.org_id;
   const customerId = session.customer;
   const subscriptionId = session.subscription;
 
-  console.log("Upgrading org:", orgId, "subscription:", subscriptionId);
+  // Determine plan from amount
+  const amount = session.amount_total;
+  let plan = "pro";
+  let limit = 50000;
+
+  if (amount >= 4900) {
+    plan = "scale";
+    limit = 200000;
+  }
+
+  console.log("Upgrading org:", orgId, "to:", plan);
 
   await pool.query(
     `
     UPDATE orgs
-    SET plan='pro',
-        monthly_limit=100000,
-        stripe_customer_id=$2,
-        stripe_subscription_id=$3
+    SET plan=$2,
+        monthly_limit=$3,
+        stripe_customer_id=$4,
+        stripe_subscription_id=$5
     WHERE id=$1
     `,
-    [orgId, customerId, subscriptionId]
+    [orgId, plan, limit, customerId, subscriptionId]
   );
 }
 
@@ -308,7 +316,7 @@ app.post("/orgs", async (req, res) => {
   const apiKey = generateApiKey();
 
   await pool.query(
-    "INSERT INTO orgs(id,name,plan,monthly_limit) VALUES($1,$2,'free',1000)",
+    "INSERT INTO orgs(id,name,plan,monthly_limit) VALUES($1,$2,'free',500)",
     [orgId, req.body?.name || null]
   );
 
@@ -354,6 +362,29 @@ app.post("/billing/checkout", async (req, res) => {
     success_url: "https://quickaiapi.com/success",
     cancel_url: "https://quickaiapi.com/cancel",
 
+    metadata: {
+      org_id: orgId,
+    },
+  });
+
+  res.json({ url: session.url });
+});
+
+app.post("/billing/checkout/scale", async (req, res) => {
+  const { orgId } = req.body;
+
+  if (!orgId) return res.status(400).json({ error: "Missing orgId" });
+
+  const session = await stripe.checkout.sessions.create({
+    mode: "subscription",
+    line_items: [
+      {
+        price: process.env.STRIPE_PRICE_SCALE_ID!,
+        quantity: 1,
+      },
+    ],
+    success_url: "https://quickaiapi.com/success",
+    cancel_url: "https://quickaiapi.com/cancel",
     metadata: {
       org_id: orgId,
     },
@@ -938,13 +969,13 @@ footer p{font-size:13px;color:var(--text-dim)}
   <div class="section-title">Simple. Predictable. No surprises.</div>
   <div class="section-desc" style="margin-left:auto;margin-right:auto">No per-token billing. No hidden fees. Just a flat monthly rate.</div>
 
-  <div class="price-cards">
+  <div class="price-cards" style="max-width:1000px">
     <div class="pc">
       <div class="pc-name">Free</div>
       <div class="pc-amount">$0 <span>/month</span></div>
       <div class="pc-desc">For testing and side projects</div>
       <ul class="pc-features">
-        <li>1,000 requests/month</li>
+        <li>500 requests/month</li>
         <li>All 12 AI endpoints</li>
         <li>API key auth</li>
         <li>Usage tracking</li>
@@ -955,15 +986,28 @@ footer p{font-size:13px;color:var(--text-dim)}
       <div class="badge">MOST POPULAR</div>
       <div class="pc-name">Pro</div>
       <div class="pc-amount">$19 <span>/month</span></div>
-      <div class="pc-desc">For production apps and real traffic</div>
+      <div class="pc-desc">For production apps</div>
       <ul class="pc-features">
-        <li>100,000 requests/month</li>
+        <li>50,000 requests/month</li>
         <li>All 12 AI endpoints</li>
         <li>Per-endpoint analytics</li>
         <li>Priority support</li>
         <li>Stripe billing portal</li>
       </ul>
-      <button class="pc-btn primary" onclick="openModal()">Start Pro Trial</button>
+      <button class="pc-btn primary" onclick="openModal()">Start Pro</button>
+    </div>
+    <div class="pc">
+      <div class="pc-name">Scale</div>
+      <div class="pc-amount">$49 <span>/month</span></div>
+      <div class="pc-desc">For apps with real traffic</div>
+      <ul class="pc-features">
+        <li>200,000 requests/month</li>
+        <li>All 12 AI endpoints</li>
+        <li>Per-endpoint analytics</li>
+        <li>Priority support</li>
+        <li>Stripe billing portal</li>
+      </ul>
+      <button class="pc-btn secondary" onclick="openModal()">Start Scale</button>
     </div>
   </div>
 </section>
@@ -1095,7 +1139,7 @@ Response:
 Response:
 {"url": "https://checkout.stripe.com/..."}</pre>
 <h2>Rate Limits</h2>
-<p>Free: 1,000 requests/month. Pro: 100,000 requests/month. Returns 402 when limit reached.</p>
+<p>Free: 500 requests/month. Pro: 50,000 requests/month. Scale: 200,000 requests/month. Returns 402 when limit reached.</p>
 </div>
 </body>
 </html>`);
