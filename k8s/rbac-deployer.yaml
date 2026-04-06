@@ -1,0 +1,46 @@
+---
+# Service Account for CI/CD
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: quickai-deployer
+  namespace: default
+---
+# Role: Can deploy, update, rollback (but NOT delete)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: quickai-deployer
+  namespace: default
+rules:
+  # Read permissions
+  - apiGroups: [""]
+    resources: ["pods", "services", "configmaps"]
+    verbs: ["get", "list", "watch"]
+  # Deploy permissions
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+  # Rollback permissions
+  - apiGroups: ["apps"]
+    resources: ["deployments/rollback"]
+    verbs: ["create"]
+  # Status checking
+  - apiGroups: ["apps"]
+    resources: ["deployments/status"]
+    verbs: ["get"]
+---
+# RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: quickai-deployer-binding
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: quickai-deployer
+    namespace: default
+roleRef:
+  kind: Role
+  name: quickai-deployer
+  apiGroup: rbac.authorization.k8s.io
