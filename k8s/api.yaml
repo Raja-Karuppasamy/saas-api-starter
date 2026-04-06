@@ -12,9 +12,15 @@ spec:
       labels:
         app: api
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: api
-          image: rajajeba/saas-api:latest
+          image: rajajeba/saas-api:v1
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
@@ -28,6 +34,12 @@ spec:
           envFrom:
             - secretRef:
                 name: quickai-secrets
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
           livenessProbe:
             httpGet:
               path: /health
