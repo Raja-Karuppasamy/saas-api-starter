@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: config-demo
+spec:
+  containers:
+  - name: demo
+    image: busybox
+    command: ["sh", "-c", "echo Starting... && sleep 3600"]
+    
+    # METHOD 1: All config as environment variables
+    envFrom:
+    - configMapRef:
+        name: quickai-config
+    
+    # METHOD 2: Individual env vars from ConfigMap
+    env:
+    - name: CUSTOM_NODE_ENV
+      valueFrom:
+        configMapKeyRef:
+          name: quickai-config
+          key: NODE_ENV
+    
+    # METHOD 3: Mount as files (volume)
+    volumeMounts:
+    - name: config-volume
+      mountPath: /etc/config
+      
+  volumes:
+  - name: config-volume
+    configMap:
+      name: quickai-config
