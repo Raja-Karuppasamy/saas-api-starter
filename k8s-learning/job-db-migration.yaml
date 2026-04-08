@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migration
+  labels:
+    app: quickai
+    task: migration
+spec:
+  template:
+    spec:
+      containers:
+      - name: migrate
+        image: migrate/migrate
+        command:
+        - sh
+        - -c
+        - |
+          echo "Starting database migration..."
+          echo "Connected to: $DATABASE_URL"
+          echo "Running migration scripts..."
+          sleep 3
+          echo "Migration complete!"
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: quickai-secrets
+              key: DATABASE_URL
+      restartPolicy: Never
+  backoffLimit: 2  # Retry up to 2 times

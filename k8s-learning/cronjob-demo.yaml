@@ -1,0 +1,15 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-job
+spec:
+  schedule: "*/2 * * * *"  # ← Every 2 minutes
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: backup
+            image: busybox
+            command: ["sh", "-c", "date && echo Backing up database... && sleep 5 && echo Backup complete!"]
+          restartPolicy: Never

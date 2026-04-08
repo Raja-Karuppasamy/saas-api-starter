@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: parallel-job
+spec:
+  completions: 5        # ← Run 5 times total
+  parallelism: 2        # ← Run 2 at a time
+  template:
+    spec:
+      containers:
+      - name: worker
+        image: busybox
+        command: ["sh", "-c", "echo Processing task $HOSTNAME && sleep 3 && echo Done!"]
+      restartPolicy: Never
