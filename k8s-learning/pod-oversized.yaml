@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: huge-pod
+  namespace: demo-quota
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    resources:
+      requests:
+        cpu: "3"      # Exceeds quota (2 CPU total)
+        memory: 10Gi  # Exceeds quota (4Gi total)
+      limits:
+        cpu: "5"
+        memory: 20Gi

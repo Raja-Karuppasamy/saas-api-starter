@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-quota
+  namespace: demo-quota
+spec:
+  hard:
+    requests.cpu: "2"           # Max 2 CPU cores requested
+    requests.memory: 4Gi        # Max 4Gi memory requested
+    limits.cpu: "4"             # Max 4 CPU cores limit
+    limits.memory: 8Gi          # Max 8Gi memory limit
+    pods: "10"                  # Max 10 pods
+    services: "5"               # Max 5 services
+    persistentvolumeclaims: "3" # Max 3 PVCs
