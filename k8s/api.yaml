@@ -12,6 +12,15 @@ spec:
       labels:
         app: api
     spec:
+      affinity:
+        podAntiAffinity:  # ← Spread pods across nodes
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app: api
+              topologyKey: kubernetes.io/hostname
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -34,6 +43,8 @@ spec:
           envFrom:
             - secretRef:
                 name: quickai-secrets
+            - configMapRef:
+                name: quickai-config
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
