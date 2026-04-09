@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: init-demo
+spec:
+  initContainers:
+  - name: check-db
+    image: busybox
+    command:
+    - sh
+    - -c
+    - |
+      echo "Init: Checking if database is ready..."
+      sleep 5
+      echo "Init: Database is ready!"
+  
+  - name: run-migrations
+    image: busybox
+    command:
+    - sh
+    - -c
+    - |
+      echo "Init: Running database migrations..."
+      sleep 3
+      echo "Init: Migrations complete!"
+  
+  containers:
+  - name: app
+    image: busybox
+    command:
+    - sh
+    - -c
+    - |
+      echo "App: Starting application..."
+      while true; do
+        echo "App: Running..."
+        sleep 30
+      done

@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sidecar-demo
+spec:
+  volumes:
+  - name: shared-logs
+    emptyDir: {}
+  
+  containers:
+  # Main application
+  - name: app
+    image: busybox
+    command:
+    - sh
+    - -c
+    - |
+      while true; do
+        echo "$(date) - Application log entry" >> /var/log/app.log
+        sleep 2
+      done
+    volumeMounts:
+    - name: shared-logs
+      mountPath: /var/log
+  
+  # Sidecar: Log shipper
+  - name: log-shipper
+    image: busybox
+    command:
+    - sh
+    - -c
+    - |
+      echo "Sidecar: Starting log shipper..."
+      while true; do
+        if [ -f /var/log/app.log ]; then
+          echo "Sidecar: Shipping logs to external service..."
+          tail -n 5 /var/log/app.log
+        fi
+        sleep 5
+      done
+    volumeMounts:
+    - name: shared-logs
+      mountPath: /var/log

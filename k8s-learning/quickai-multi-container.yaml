@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quickai-advanced
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quickai-advanced
+  template:
+    metadata:
+      labels:
+        app: quickai-advanced
+    spec:
+      # Init Container: Run DB migrations
+      initContainers:
+      - name: db-migrate
+        image: busybox
+        command:
+        - sh
+        - -c
+        - |
+          echo "Running database migrations..."
+          echo "Connected to: $(echo $DATABASE_URL | cut -d@ -f2)"
+          echo "Migration 001: Create users table... ✓"
+          echo "Migration 002: Add indexes... ✓"
+          echo "Migration 003: Update schema... ✓"
+          echo "Migrations complete!"
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: quickai-secrets
+              key: DATABASE_URL
+      
+      # Shared volume for logs
+      volumes:
+      - name: app-logs
+        emptyDir: {}
+      
+      containers:
+      # Main application
+      - name: api
+        image: busybox
+        command:
+        - sh
+        - -c
+        - |
+          echo "QuickAI API starting..."
+          while true; do
+            echo "$(date) [INFO] API request processed" >> /var/log/app/access.log
+            echo "$(date) [DEBUG] Database query executed" >> /var/log/app/debug.log
+            sleep 5
+          done
+        volumeMounts:
+        - name: app-logs
+          mountPath: /var/log/app
+      
+      # Sidecar: Log aggregator
+      - name: log-aggregator
+        image: busybox
+        command:
+        - sh
+        - -c
+        - |
+          echo "Log aggregator started..."
+          while true; do
+            if [ -f /var/log/app/access.log ]; then
+              echo "=== Shipping access logs ==="
+              tail -n 2 /var/log/app/access.log
+            fi
+            if [ -f /var/log/app/debug.log ]; then
+              echo "=== Shipping debug logs ==="
+              tail -n 2 /var/log/app/debug.log
+            fi
+            sleep 10
+          done
+        volumeMounts:
+        - name: app-logs
+          mountPath: /var/log/app
