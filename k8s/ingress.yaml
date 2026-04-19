@@ -1,9 +1,10 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: quickai-ingress
+  name: multi-app-ingress
+  namespace: default
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   ingressClassName: nginx
@@ -12,6 +13,19 @@ spec:
     - quickaiapi.com
     - www.quickaiapi.com
     secretName: quickai-tls
+  - hosts:
+    - clearfix.co
+    - www.clearfix.co
+    secretName: clearfix-tls
+  - hosts:
+    - mvptestai.com
+    - www.mvptestai.com
+    secretName: mvptest-tls
+  - hosts:
+    - resumifyapi.com
+    - www.resumifyapi.com
+    - api.resumifyapi.com
+    secretName: resumify-tls
   rules:
   - host: quickaiapi.com
     http:
@@ -31,5 +45,75 @@ spec:
         backend:
           service:
             name: api
+            port:
+              number: 80
+  - host: clearfix.co
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: clearfix
+            port:
+              number: 80
+  - host: www.clearfix.co
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: clearfix
+            port:
+              number: 80
+  - host: mvptestai.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: mvptest
+            port:
+              number: 80
+  - host: www.mvptestai.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: mvptest
+            port:
+              number: 80
+  - host: resumifyapi.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: resumify-frontend
+            port:
+              number: 80
+  - host: www.resumifyapi.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: resumify-frontend
+            port:
+              number: 80
+  - host: api.resumifyapi.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: resumify
             port:
               number: 80
